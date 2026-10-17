@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- TimeKit app icon: the sidebar's "T" on warm dark paper, with an ember
+       dot for the running timer. Regenerate every size with
+       `pnpm tauri icon src-tauri/app-icon.svg`. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34302b"/>
+      <stop offset="1" stop-color="#1b1917"/>
+    </linearGradient>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="208" fill="url(#bg)"/>
+  <rect x="64.5" y="64.5" width="895" height="895" rx="207.5" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <!-- T -->
+  <rect x="264" y="272" width="496" height="124" rx="40" fill="#f4f1eb"/>
+  <rect x="450" y="272" width="124" height="488" rx="40" fill="#f4f1eb"/>
+  <!-- running-timer dot -->
+  <circle cx="704" cy="704" r="76" fill="#de562d"/>
+</svg>
