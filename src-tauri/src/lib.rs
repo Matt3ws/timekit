@@ -1,11 +1,16 @@
 mod db;
 mod migrate;
 mod sync_config;
+#[cfg(windows)]
+mod taskbar_icon;
 
 use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    #[cfg(windows)]
+    taskbar_icon::set_app_id();
+
     tauri::Builder::default()
         // Must be the first plugin: a second launch exits right here and
         // brings the running window to the front instead.
@@ -29,6 +34,11 @@ pub fn run() {
                 db::DbState::open(&handle).await
             }))?;
             app.manage(state);
+
+            #[cfg(windows)]
+            if let Some(window) = app.get_webview_window("main") {
+                taskbar_icon::apply(&window);
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
