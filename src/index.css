@@ -138,9 +138,6 @@
   .platform-windows body {
     background: var(--muted);
   }
-  .platform-windows [data-tauri-drag-region] {
-    height: 0.75rem;
-  }
   /* Re-enable text selection where it actually matters. */
   input,
   textarea,
@@ -178,4 +175,11 @@
     background: color-mix(in oklch, var(--foreground) 30%, transparent);
     background-clip: content-box;
   }
+}
+
+/* Windows: no traffic lights to clear, so the drag-region spacers shrink.
+   Unlayered on purpose: Tailwind's utility layer (the spacers' `h-10`)
+   beats anything inside @layer base, whatever the specificity. */
+.platform-windows [data-tauri-drag-region] {
+  height: 0.75rem;
 }
