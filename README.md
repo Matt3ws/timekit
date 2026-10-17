@@ -14,9 +14,7 @@ A desktop app built with Tauri 2, React 19 and SQLite. Everything runs locally: 
 no server and no account. Sync is optional and uses your own free Turso database.
 
 <p align="center">
-  <img src="docs/screenshots/dashboard.png" width="420" alt="TimeKit: the dashboard with today, this week, unbilled and awaiting payment" valign="top">
-  &nbsp;
-  <img src="docs/screenshots/sync.png" width="420" alt="TimeKit: Settings → Sync with the Turso URL and token" valign="top">
+  <img src="docs/screenshots/dashboard.png" width="640" alt="TimeKit: the dashboard with today, this week, unbilled and awaiting payment">
 </p>
 
 - **Time:** customers → projects → tasks, with a start/stop timer on any task. Only one timer
