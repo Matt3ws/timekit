@@ -1,0 +1,11 @@
+# Single-package repo; this file exists to carry pnpm settings.
+packages:
+  - "."
+
+allowBuilds:
+  esbuild: true
+
+# Supply-chain hardening: refuse dependency versions published within the last
+# 24h (1440 min). Forces fresh resolution to pick versions that have had time to
+# be vetted, and keeps the lockfile reproducible across machines/CI.
+minimumReleaseAge: 1440

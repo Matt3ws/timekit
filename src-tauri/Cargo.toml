@@ -1,0 +1,34 @@
+[package]
+name = "timekit"
+version = "0.1.0"
+description = "Offline time tracking and invoicing"
+authors = ["Christian Tang Christensen"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "timekit_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["macos-private-api"] }
+tauri-plugin-opener = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-dialog = "2"
+# One TimeKit at a time: a second launch focuses the running window instead
+# of opening the same database twice (Windows allows many instances).
+tauri-plugin-single-instance = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# SQLite fork with Turso embedded replicas: either a plain local file, or a
+# local replica whose writes go to the Turso primary (see db.rs).
+libsql = "0.10"
+tokio = { version = "1", features = ["sync", "time"] }
+

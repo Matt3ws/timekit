@@ -1,0 +1,181 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+
+  /* Warm-neutral palette — light. Layered paper + ink, never pure #fff / #000. */
+  --background: oklch(0.971 0.003 83);
+  --foreground: oklch(0.245 0.006 67);
+  --card: oklch(0.992 0.002 83);
+  --card-foreground: oklch(0.245 0.006 67);
+  --popover: oklch(0.996 0.001 83);
+  --popover-foreground: oklch(0.245 0.006 67);
+  --primary: oklch(0.27 0.006 67);
+  --primary-foreground: oklch(0.98 0.003 83);
+  --secondary: oklch(0.935 0.004 83);
+  --secondary-foreground: oklch(0.27 0.006 67);
+  --muted: oklch(0.948 0.004 83);
+  --muted-foreground: oklch(0.524 0.008 67);
+  --accent: oklch(0.935 0.004 83);
+  --accent-foreground: oklch(0.27 0.006 67);
+  --destructive: oklch(0.555 0.2 25);
+  --border: oklch(0.898 0.004 83);
+  --input: oklch(0.898 0.004 83);
+  --ring: oklch(0.58 0.07 250);
+
+  /* Ember: the one strong accent. Only for "time is running" and the primary
+     money action (Invoice). Everything else stays paper and ink. */
+  --ember: oklch(0.63 0.19 38);
+  --ember-foreground: oklch(0.99 0.01 60);
+  --ember-soft: oklch(0.95 0.035 45);
+  --ember-line: oklch(0.86 0.07 45);
+  /* Status tints (chips, dots). */
+  --success: oklch(0.56 0.12 150);
+  --success-soft: oklch(0.94 0.04 150);
+  --info: oklch(0.55 0.12 250);
+  --info-soft: oklch(0.94 0.03 250);
+  --plum: oklch(0.52 0.13 300);
+  --plum-soft: oklch(0.94 0.035 300);
+}
+
+.dark {
+  /* Warm-neutral palette — dark. Layered charcoal, never pure black. */
+  --background: oklch(0.186 0.004 70);
+  --foreground: oklch(0.948 0.004 83);
+  --card: oklch(0.224 0.005 70);
+  --card-foreground: oklch(0.948 0.004 83);
+  --popover: oklch(0.244 0.005 70);
+  --popover-foreground: oklch(0.948 0.004 83);
+  --primary: oklch(0.945 0.004 83);
+  --primary-foreground: oklch(0.22 0.006 70);
+  --secondary: oklch(0.27 0.005 70);
+  --secondary-foreground: oklch(0.948 0.004 83);
+  --muted: oklch(0.262 0.005 70);
+  --muted-foreground: oklch(0.685 0.008 75);
+  --accent: oklch(0.285 0.005 70);
+  --accent-foreground: oklch(0.948 0.004 83);
+  --destructive: oklch(0.68 0.17 25);
+  --border: oklch(0.99 0 0 / 9%);
+  --input: oklch(0.99 0 0 / 12%);
+  --ring: oklch(0.65 0.09 250);
+
+  --ember: oklch(0.7 0.17 42);
+  --ember-foreground: oklch(0.2 0.03 40);
+  --ember-soft: oklch(0.3 0.06 40);
+  --ember-line: oklch(0.42 0.09 40);
+  --success: oklch(0.74 0.13 150);
+  --success-soft: oklch(0.3 0.05 150);
+  --info: oklch(0.74 0.11 250);
+  --info-soft: oklch(0.3 0.05 250);
+  --plum: oklch(0.74 0.12 300);
+  --plum-soft: oklch(0.3 0.05 300);
+}
+
+@theme inline {
+  --font-display:
+    -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  --font-mono:
+    "SF Mono", "JetBrains Mono", ui-monospace, "Menlo", monospace;
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 6px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ember: var(--ember);
+  --color-ember-foreground: var(--ember-foreground);
+  --color-ember-soft: var(--ember-soft);
+  --color-ember-line: var(--ember-line);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-plum: var(--plum);
+  --color-plum-soft: var(--plum-soft);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  /* Transparent so the native macOS window vibrancy shows behind the sidebar. */
+  body {
+    @apply text-foreground;
+    font-family: var(--font-sans);
+    background: transparent;
+    -webkit-font-smoothing: antialiased;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Windows: opaque window with a native title bar — no vibrancy to show
+     through and no traffic lights to clear. */
+  .platform-windows body {
+    background: var(--muted);
+  }
+  .platform-windows [data-tauri-drag-region] {
+    height: 0.75rem;
+  }
+  /* Re-enable text selection where it actually matters. */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--foreground) 16%, transparent);
+  }
+  /* Tabular figures everywhere — numbers line up like an instrument. */
+  .font-mono,
+  .tabular-nums {
+    font-feature-settings: "tnum" 1, "cv01" 1;
+  }
+}
+
+@layer components {
+  /* Small uppercase section label: "THIS WEEK", "UNBILLED". */
+  .label-caps {
+    @apply text-[10.5px] font-semibold uppercase tracking-[0.09em] text-muted-foreground;
+  }
+  /* Thin, unobtrusive scrollbars. */
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklch, var(--foreground) 18%, transparent);
+    border: 2px solid transparent;
+    background-clip: content-box;
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklch, var(--foreground) 30%, transparent);
+    background-clip: content-box;
+  }
+}

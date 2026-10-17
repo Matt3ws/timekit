@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Turso-synkronisering — Plan</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/styles/github-dark.min.css" media="(prefers-color-scheme: dark)" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/styles/github.min.css" media="(prefers-color-scheme: light)" />
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/highlight.min.js"></script>
+<style>
+  :root {
+    --bg: #fafafa; --fg: #0f172a; --muted: #64748b; --card: #ffffff;
+    --border: #e2e8f0; --accent: #2563eb; --good: #16a34a; --warn: #d97706; --bad: #dc2626;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b0f1a; --fg: #e2e8f0; --muted: #94a3b8; --card: #111827;
+      --border: #1f2937; --accent: #60a5fa; --good: #4ade80; --warn: #fbbf24; --bad: #f87171;
+    }
+  }
+  html, body { background: var(--bg); color: var(--fg); }
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+  .muted { color: var(--muted); }
+  .accent { color: var(--accent); }
+  .pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; border: 1px solid var(--border); }
+  pre code.hljs { border-radius: 10px; padding: 14px 16px; font-size: 13px; line-height: 1.55; }
+  code:not(.hljs) { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: color-mix(in srgb, var(--muted) 18%, transparent); padding: 1px 6px; border-radius: 4px; font-size: 0.9em; }
+  .tree { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; line-height: 1.7; white-space: pre; overflow-x: auto; }
+  .tree .add { color: var(--good); }
+  .tree .mod { color: var(--warn); }
+  .tree .del { color: var(--bad); text-decoration: line-through; text-decoration-color: var(--bad); }
+  input[type="checkbox"] { accent-color: var(--accent); width: 16px; height: 16px; vertical-align: -3px; margin-right: 8px; }
+  .anchor:hover .anchor-link { opacity: 1; }
+  .anchor-link { opacity: 0; transition: opacity .15s; margin-left: 8px; color: var(--muted); text-decoration: none; }
+  svg text { fill: var(--fg); font-family: ui-sans-serif, system-ui, sans-serif; }
+  svg .box { fill: var(--card); stroke: var(--border); stroke-width: 1.5; }
+  svg .cloud { fill: color-mix(in srgb, var(--accent) 12%, var(--card)); stroke: var(--accent); stroke-width: 1.5; }
+  svg .read { stroke: var(--good); stroke-width: 2; fill: none; }
+  svg .write { stroke: var(--warn); stroke-width: 2; fill: none; }
+  svg .sync { stroke: var(--accent); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
+  svg .small { font-size: 11px; fill: var(--muted); }
+</style>
+</head>
+<body class="leading-relaxed">
+
+<header class="border-b" style="border-color: var(--border)">
+  <div class="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <div class="text-xs uppercase tracking-wider muted">Plan · spec</div>
+      <h1 class="text-2xl font-semibold mt-1">Turso-synkronisering mellem Mac og Windows</h1>
+    </div>
+    <div class="flex gap-2 items-center">
+      <span class="pill"><span style="width:8px;height:8px;border-radius:999px;background:var(--warn);display:inline-block"></span> Udkast</span>
+      <span class="muted text-sm">18. oktober 2026</span>
+    </div>
+  </div>
+</header>
+
+<nav class="sticky top-0 z-10 backdrop-blur border-b" style="background: color-mix(in srgb, var(--bg) 85%, transparent); border-color: var(--border)">
+  <div class="max-w-5xl mx-auto px-6 py-2 flex gap-4 text-sm overflow-x-auto whitespace-nowrap">
+    <a href="#tldr" class="muted">TL;DR</a>
+    <a href="#context" class="muted">Baggrund</a>
+    <a href="#architecture" class="muted">Arkitektur</a>
+    <a href="#ui" class="muted">Indstillinger</a>
+    <a href="#files" class="muted">Filer</a>
+    <a href="#steps" class="muted">Trin</a>
+    <a href="#snippets" class="muted">Kode</a>
+    <a href="#you" class="muted">Det skal du gøre</a>
+    <a href="#open-questions" class="muted">Åbne spørgsmål</a>
+  </div>
+</nav>
+
+<main class="max-w-5xl mx-auto px-6 py-8 space-y-10">
+
+  <section id="tldr" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">TL;DR <a href="#tldr" class="anchor-link">#</a></h2>
+    <div class="card p-5 text-base">
+      Vi erstatter <code>tauri-plugin-sql</code> med <strong>libsql embedded replica</strong>. Hver maskine får en lokal kopi af databasen,
+      så læsning er hurtig og virker offline. Alle ændringer sendes direkte til én fælles Turso-database. Det betyder ingen konflikter, og
+      fakturanumre kan ikke blive dubleret. Uden opsætning kører appen lokalt præcis som i dag. Turso-URL og token sættes i
+      <em>Settings → Synkronisering</em>. Gratisplanen dækker rigeligt (5 GB, 10 mio. skrevne rækker om måneden).
+    </div>
+  </section>
+
+  <section id="context" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Baggrund <a href="#context" class="anchor-link">#</a></h2>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div class="card p-5 ring-2 ring-offset-2" style="--tw-ring-color: var(--accent)">
+        <div class="flex justify-between items-start mb-2">
+          <h3 class="font-semibold">Valgt: altid online-skriv</h3>
+          <span class="pill">valgt</span>
+        </div>
+        <p class="text-sm"><code>libsql</code>-craten (SQLite-fork, produktionsklar). Læsning sker lokalt, skrivning går til Turso, og den lokale kopi opdateres bagefter.</p>
+        <div class="mt-3 text-xs muted"><strong>Tradeoff:</strong> Det kræver internet at starte en timer eller oprette en faktura. Til gengæld virker alle eksisterende migrationer uændret, fordi det er rigtig SQLite.</div>
+      </div>
+      <div class="card p-5 opacity-70">
+        <h3 class="font-semibold mb-2">Fravalgt: fuldt offline (Turso Sync)</h3>
+        <p class="text-sm"><code>turso</code>-craten med push/pull. Den bruger ny Rust-motor, og konflikter løses med "sidste push vinder".</p>
+        <div class="mt-3 text-xs muted"><strong>Fravalgt fordi:</strong> to maskiner offline kan udstede samme fakturanummer, og motoren mangler stadig dele af SQLite.</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="architecture" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Arkitektur &amp; dataflow <a href="#architecture" class="anchor-link">#</a></h2>
+    <div class="card p-5">
+      <svg viewBox="0 0 760 300" class="w-full h-auto" role="img" aria-label="Dataflow mellem WebView, Rust og Turso">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+        </defs>
+        <!-- Mac -->
+        <rect class="box" x="10" y="20" width="250" height="260" rx="12"/>
+        <text x="24" y="44" font-weight="600">Mac / Windows (hver maskine)</text>
+        <rect class="box" x="30" y="60" width="210" height="56" rx="8"/>
+        <text x="44" y="84" font-size="13">WebView: Drizzle (sqlite-proxy)</text>
+        <text x="44" y="102" class="small">src/db/client.ts → invoke()</text>
+        <rect class="box" x="30" y="136" width="210" height="56" rx="8"/>
+        <text x="44" y="160" font-size="13">Rust: db_query / db_batch</text>
+        <text x="44" y="178" class="small">src-tauri/src/db.rs (libsql)</text>
+        <rect class="box" x="30" y="212" width="210" height="52" rx="8"/>
+        <text x="44" y="236" font-size="13">Lokal replika</text>
+        <text x="44" y="252" class="small">timekit-sync.db (appdata)</text>
+        <line x1="135" y1="116" x2="135" y2="134" stroke="var(--muted)" stroke-width="2" marker-end="url(#ar)" style="color:var(--muted)"/>
+        <path class="read" d="M110 192 L110 210" marker-end="url(#ar)" style="color:var(--good)"/>
+        <!-- Turso -->
+        <rect class="cloud" x="500" y="110" width="240" height="90" rx="14"/>
+        <text x="518" y="140" font-weight="600">Turso (primær)</text>
+        <text x="518" y="160" class="small">én fælles database · gratisplan</text>
+        <text x="518" y="178" class="small">libsql://timekit-&lt;konto&gt;.turso.io</text>
+        <!-- arrows -->
+        <path class="write" d="M240 156 C 360 150, 400 150, 498 150" marker-end="url(#ar)" style="color:var(--warn)"/>
+        <text x="300" y="140" class="small">skrivning (kræver net)</text>
+        <path class="sync" d="M498 182 C 400 230, 330 240, 242 238" marker-end="url(#ar)" style="color:var(--accent)"/>
+        <text x="300" y="262" class="small">sync hvert 15. sek. + efter hver skrivning</text>
+        <text x="60" y="206" class="small" style="fill:var(--good)">læsning (offline ok)</text>
+      </svg>
+      <p class="text-sm muted mt-3">Uden opsætning bruger samme Rust-kode <code>Builder::new_local("timekit.db")</code>, så appen kører lokalt som i dag på den eksisterende fil.</p>
+    </div>
+  </section>
+
+  <section id="ui" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Settings → Synkronisering <a href="#ui" class="anchor-link">#</a></h2>
+    <div class="grid md:grid-cols-2 gap-4 items-start">
+      <div class="card overflow-hidden">
+        <div class="border-b px-4 py-3" style="border-color: var(--border)">
+          <div class="font-medium">Sync</div>
+          <div class="text-xs muted">Share one database between your Mac and PC via Turso.</div>
+        </div>
+        <div class="p-4 space-y-3">
+          <div class="flex items-center gap-2 text-sm"><span style="width:8px;height:8px;border-radius:999px;background:var(--good);display:inline-block"></span> Synced · last sync 4 s ago</div>
+          <label class="block text-sm">
+            <div class="mb-1">Database URL</div>
+            <input class="w-full border rounded px-3 py-1.5 text-sm" style="border-color: var(--border); background: var(--bg)" value="libsql://timekit-matias.aws-eu-west-1.turso.io" />
+          </label>
+          <label class="block text-sm">
+            <div class="mb-1">Auth token</div>
+            <input type="password" class="w-full border rounded px-3 py-1.5 text-sm" style="border-color: var(--border); background: var(--bg)" value="••••••••••••••••••••" />
+          </label>
+          <div class="flex justify-end gap-2">
+            <button class="text-xs pill">Turn off sync</button>
+            <button class="text-xs pill" style="background: var(--accent); color: white; border-color: var(--accent)">Save and restart</button>
+          </div>
+        </div>
+      </div>
+      <div class="text-sm space-y-2">
+        <p>Kortet bruger samme komponenter som det eksisterende <code>BackupsCard</code>: <code>Card</code>, <code>Input</code>, <code>Label</code> og <code>Button</code>. Teksten er på engelsk som resten af appen.</p>
+        <p>Indstillingerne gemmes i <code>sync.json</code> i appens config-mappe. De gemmes <em>ikke</em> i databasen, for så skulle tokenet bruges til at hente sig selv. Ændringer kræver genstart, fordi databasen åbnes ved opstart.</p>
+        <p>Statusprikken viser <em>Local only</em>, <em>Synced</em> eller <em>Offline (read-only)</em>. Den kommer fra en <code>sync_status</code>-kommando.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="files" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Filer <a href="#files" class="anchor-link">#</a></h2>
+    <div class="card p-5 tree"><span class="muted">src-tauri/</span>
+  <span class="mod">~ Cargo.toml</span>                <span class="muted">− tauri-plugin-sql, sqlx · + libsql, tokio</span>
+  <span class="mod">~ capabilities/default.json</span>  <span class="muted">− sql:* permissions</span>
+  <span class="muted">src/</span>
+    <span class="mod">~ lib.rs</span>                  <span class="muted">åbn DB i setup(), registrér kommandoer</span>
+    <span class="add">+ db.rs</span>                   <span class="muted">DbState, open (lokal/replika), db_query, db_batch, db_backup</span>
+    <span class="add">+ migrate.rs</span>              <span class="muted">kører migrations/, læser/skriver _sqlx_migrations</span>
+    <span class="add">+ sync_config.rs</span>          <span class="muted">sync.json: get/save/clear + sync_status</span>
+    <span class="del">- batch.rs</span>                <span class="muted">erstattes af db_batch i db.rs</span>
+<span class="muted">src/</span>
+  <span class="muted">db/</span>
+    <span class="mod">~ client.ts</span>               <span class="muted">invoke("db_query" | "db_batch") i stedet for plugin-sql</span>
+  <span class="muted">queries/</span>
+    <span class="mod">~ use-bookkeeping.ts</span>      <span class="muted">backup via invoke("db_backup") i stedet for VACUUM INTO i SQL</span>
+    <span class="add">+ use-sync.ts</span>             <span class="muted">useSyncConfig / useSaveSyncConfig / useSyncStatus</span>
+  <span class="muted">features/settings/</span>
+    <span class="mod">~ settings-page.tsx</span>       <span class="muted">+ SyncCard</span>
+<span class="mod">~ package.json</span>                <span class="muted">− @tauri-apps/plugin-sql</span>
+<span class="mod">~ CLAUDE.md</span>                   <span class="muted">ny datavej + sync-noter</span></div>
+  </section>
+
+  <section id="steps" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Trin <a href="#steps" class="anchor-link">#</a></h2>
+    <ol class="space-y-2 list-none pl-0">
+      <li><label><input type="checkbox"> <strong>Rust-databaselag:</strong> <code>db.rs</code> med <code>libsql</code>. Lokal tilstand bruger samme <code>timekit.db</code> som i dag, så dine Windows-data overlever.</label></li>
+      <li><label><input type="checkbox"> <strong>Migrationsrunner:</strong> <code>migrate.rs</code> genbruger sqlx' tabel <code>_sqlx_migrations</code>. Eksisterende databaser (version 13) bliver derfor genkendt og ikke migreret igen.</label></li>
+      <li><label><input type="checkbox"> <strong>Kommandoer:</strong> <code>db_query</code> returnerer rækker som arrays i den form, sqlite-proxy forventer. <code>db_batch</code> kører én transaktion. <code>db_backup</code> laver <code>VACUUM INTO</code> på den lokale fil.</label></li>
+      <li><label><input type="checkbox"> <strong>Frontend:</strong> skift <code>client.ts</code> og backup-koden. Fjern <code>@tauri-apps/plugin-sql</code>.</label></li>
+      <li><label><input type="checkbox"> <strong>Test lokal tilstand</strong> på Windows: appen starter, eksisterende data ses, timer, faktura og backup virker.</label></li>
+      <li><label><input type="checkbox"> <strong>Sync-indstillinger:</strong> <code>sync_config.rs</code>, <code>use-sync.ts</code> og <code>SyncCard</code> med gem og genstart.</label></li>
+      <li><label><input type="checkbox"> <strong>Test sync</strong> mod din Turso-database: første maskine migrerer den tomme database, data dukker op i Turso-dashboardet, og appen opfører sig ordentligt offline.</label></li>
+      <li><label><input type="checkbox"> <code>pnpm typecheck</code>, <code>pnpm test</code>, opdatér <code>CLAUDE.md</code>.</label></li>
+      <li><label><input type="checkbox"> <strong>Mac:</strong> kopiér mappen, <code>pnpm install</code>, <code>pnpm tauri dev</code>, og indsæt samme URL og token.</label></li>
+    </ol>
+  </section>
+
+  <section id="snippets" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Nøglekode <a href="#snippets" class="anchor-link">#</a></h2>
+    <div class="space-y-4">
+      <div class="card p-5">
+        <div class="text-xs muted mb-2">src-tauri/src/db.rs — åbn databasen</div>
+<pre><code class="language-rust">let db = match sync_config::load(&amp;app)? {
+    // Ingen opsætning: præcis som i dag, samme fil.
+    None =&gt; libsql::Builder::new_local(data_dir.join("timekit.db")).build().await?,
+    // Turso: lokal replika, skrivninger går til primæren.
+    Some(cfg) =&gt; libsql::Builder::new_remote_replica(data_dir.join("timekit-sync.db"), cfg.url, cfg.auth_token)
+        .sync_interval(Duration::from_secs(15))
+        .read_your_writes(true)
+        .build()
+        .await?,
+};
+let conn = db.connect()?;
+migrate::run(&amp;conn).await?;</code></pre>
+      </div>
+      <div class="card p-5">
+        <div class="text-xs muted mb-2">src/db/client.ts — Drizzle taler med Rust i stedet for plugin-sql</div>
+<pre><code class="language-ts">export const db: SqliteRemoteDatabase&lt;typeof schema&gt; = drizzle(
+  async (sql, params, method) =&gt; {
+    const rows = await invoke&lt;unknown[][]&gt;("db_query", { sql, params });
+    return { rows: method === "get" ? (rows[0] ?? []) : rows };
+  },
+  async (queries) =&gt; {
+    await invoke("db_batch", { statements: queries.map(({ sql, params }) =&gt; ({ sql, params })) });
+    return queries.map(() =&gt; ({ rows: [] }));
+  },
+  { schema },
+);</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <section id="you" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Det skal du selv gøre <a href="#you" class="anchor-link">#</a></h2>
+    <div class="card p-5 text-sm space-y-2">
+      <p>Jeg må ikke oprette konti eller håndtere dit token, så de her trin skal du selv tage. Du skal først bruge dem ved trin 7:</p>
+      <ol class="list-decimal pl-5 space-y-1">
+        <li>Opret en gratis konto på <code>turso.tech</code>. Det kræver ikke kreditkort.</li>
+        <li>Opret en database i dashboardet, for eksempel <code>timekit</code>, i en EU-region.</li>
+        <li>Kopiér databasens URL (<code>libsql://…</code>) og opret et auth-token til den.</li>
+        <li>Indsæt begge dele i <em>Settings → Sync</em> i appen. Turso CLI kører ikke direkte på Windows, så web-dashboardet er nemmest.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="open-questions" class="anchor">
+    <h2 class="text-lg font-semibold mb-3">Åbne spørgsmål <a href="#open-questions" class="anchor-link">#</a></h2>
+    <ul class="space-y-2">
+      <li class="card p-4"><strong>Opstart uden internet:</strong> det er uvist, om <code>new_remote_replica(...).build()</code> fejler, når der ikke er net, selv om replikaen findes. Hvis den gør, åbner vi replikafilen lokalt som skrivebeskyttet og viser "Offline (read-only)". <span class="muted">Afklares i trin 7.</span></li>
+      <li class="card p-4"><strong>Kvitteringsfiler (bilag) synkroniseres ikke.</strong> Udgifter gemmer en sti til en fil i appdata, og den fil findes ikke på den anden maskine. Udgiften synkroniseres, men billedet gør ikke. Det kan løses senere ved at gemme bilag i databasen (der er 5 GB gratis). <span class="muted">Uden for denne plan.</span></li>
+      <li class="card p-4"><strong>Backup i sync-tilstand:</strong> <code>VACUUM INTO</code> skal køre på en separat lokal forbindelse til replikafilen, ikke gennem replikaen, der ville sende den til Turso. Det skal testes. Kan det ikke lade sig gøre, laver vi en sync og kopierer derefter filen. <span class="muted">Turso har desuden 1 dags point-in-time restore på gratisplanen.</span></li>
+      <li class="card p-4"><strong>Inaktivitet på gratisplanen:</strong> Turso har tidligere sat gratis databaser på pause efter en periode uden brug. Det fremgår ikke af prissiden lige nu. <span class="muted">Hvis det sker, vækker første opkald den igen.</span></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer class="max-w-5xl mx-auto px-6 py-10 muted text-xs">
+  Genereret af <code>plan</code>-skillen.
+</footer>
+
+<script>hljs.highlightAll();</script>
+</body>
+</html>
