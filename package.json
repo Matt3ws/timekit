@@ -11,6 +11,8 @@
     "tauri": "tauri",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "bump": "node scripts/version.mjs",
+    "version:check": "node scripts/version.mjs --check",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio"
   },

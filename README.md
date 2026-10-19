@@ -43,8 +43,9 @@ Every CI run also uploads both installers as artifacts, kept for 14 days.
 
 **Mac**
 - Open the `.dmg` and drag TimeKit to Applications.
-- The app isn't signed, so macOS blocks it the first time. Go to *System Settings → Privacy
-  & Security* and choose **Open Anyway**.
+- TimeKit is signed with its own certificate rather than a paid Apple one, so macOS can't
+  verify the developer the first time. Go to *System Settings → Privacy & Security* and choose
+  **Open Anyway**. You only do this once: every release is signed with the same certificate.
 
 **Windows**
 - Run the setup file. It installs for your user only (no admin needed) and adds TimeKit to
@@ -135,7 +136,26 @@ pnpm test               # vitest: money, durations, billing, subscriptions, form
   `src-tauri/target/debug/bundle/nsis/`.
 - **CI:** every push to `main` and every pull request runs the typecheck, the tests and a
   frontend build, then builds the app on macOS (universal `.dmg`) and Windows (NSIS installer)
-  and uploads both installers.
+  and uploads both installers. See [Releasing](#releasing) for how releases are published.
+
+## Releasing
+
+`main` only takes pull requests with a green CI run. When CI passes on `main` and the version
+in `src-tauri/tauri.conf.json` has no GitHub release yet, the Release workflow builds both
+installers, signs the Mac app and publishes them as `v<version>`. Merges without a version bump
+release nothing.
+
+1. In your pull request, run `pnpm bump 0.2.0`. It sets the version in `package.json`,
+   `tauri.conf.json`, `Cargo.toml` and `Cargo.lock`.
+2. Add a `## 0.2.0` section to `CHANGELOG.md`: it becomes the release notes. CI fails the
+   pull request if the versions differ or the section is missing (`pnpm version:check`).
+3. Merge. The release appears under [Releases](../../releases) once both builds finish.
+
+**Signing:** the Mac app is signed with a self-signed certificate, "TimeKit Code Signing
+(Christian Tang Christensen)", stored in the repository secrets `TIMEKIT_CERT_P12` (the `.p12`,
+base64) and `TIMEKIT_CERT_PASSWORD`. Using the same certificate for every release keeps macOS
+treating updates as the same app. A release with an unsigned Mac app fails instead of
+publishing. The Windows installer isn't signed.
 
 ## Under the hood
 

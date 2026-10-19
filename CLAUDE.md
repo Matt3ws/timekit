@@ -118,6 +118,7 @@ Project-local skills live under `.claude/skills/`. They auto-trigger from their 
 - `pnpm typecheck` — `tsc --noEmit`
 - `pnpm test` — vitest (lib/ unit tests)
 - `pnpm tauri build` — production `.app` / `.dmg`
+- `pnpm bump <x.y.z>` — set the version in package.json, tauri.conf.json, Cargo.toml and Cargo.lock, then add `## <x.y.z>` to `CHANGELOG.md`. Merging a bump to `main` publishes a signed release (`.github/workflows/release.yml`, see README → Releasing). `pnpm version:check` (run in CI) fails if the versions disagree or the changelog section is missing
 
 > Requires the Rust toolchain (`cargo`/`rustc`) on PATH for any `tauri` command.
 
