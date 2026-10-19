@@ -17,6 +17,7 @@ import { DatePicker } from "@/ui/date-picker";
 import { useSettings, useUpdateSettings } from "@/queries/use-settings";
 import { useBackupNow } from "@/queries/use-bookkeeping";
 import { SyncCard } from "@/features/settings/sync-card";
+import { UpdatesCard } from "@/features/settings/updates-card";
 import { amountOrZero, optionalEmail, optionalText, percentOrZero } from "@/features/forms/fields";
 import { minorToInput } from "@/lib/money";
 import { formatInvoiceNumber, nextRegistrationRenewal } from "@/lib/billing";
@@ -412,6 +413,8 @@ export const SettingsPage = (): React.JSX.Element => {
         <BackupsCard settings={settings} />
 
         <SyncCard />
+
+        <UpdatesCard />
       </div>
 
       <div className="sticky bottom-4 z-10 mt-6 flex items-center justify-end gap-3 rounded-lg border border-border bg-background/90 px-4 py-2.5 shadow-sm backdrop-blur">

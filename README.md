@@ -55,6 +55,12 @@ Every CI run also uploads both installers as artifacts, kept for 14 days.
 
 Only one TimeKit runs at a time: starting it again brings the open window to the front.
 
+**Updates:** TimeKit checks GitHub for a new release when it starts and once a day. When one is
+out, **Update to <version>** appears in the sidebar: one click downloads it, installs it and
+restarts TimeKit (a running timer keeps going). *Settings → Updates* shows the installed version,
+has **Check now**, and can turn the automatic check off. Versions before 0.2.0 can't update
+themselves: install 0.2.0 by hand once.
+
 ## Sync
 
 Sync keeps one shared database in [Turso](https://turso.tech) and a local copy on each
@@ -156,6 +162,14 @@ release nothing.
 base64) and `TIMEKIT_CERT_PASSWORD`. Using the same certificate for every release keeps macOS
 treating updates as the same app. A release with an unsigned Mac app fails instead of
 publishing. The Windows installer isn't signed.
+
+**Updates:** the release also publishes `TimeKit.app.tar.gz` and `latest.json`, which the in-app
+updater reads from `releases/latest/download/latest.json`. Updates are signed with a separate
+updater key (secrets `TIMEKIT_UPDATER_KEY` and `TIMEKIT_UPDATER_KEY_PASSWORD`). Its public half
+is `plugins.updater.pubkey` in `tauri.conf.json`, and TimeKit refuses any update not signed
+with it. If the key is lost, installed copies can't update any more and need a manual
+install, so keep a copy of it somewhere safe. Only release builds create the update bundles,
+so local builds and CI on pull requests don't need the key.
 
 ## Under the hood
 
