@@ -108,6 +108,7 @@ Project-local skills live under `.claude/skills/`. They auto-trigger from their 
 - **Wrap up** non-trivial sessions with the `handover` skill.
 - **After any user correction** → add the pattern to `.claude/tasks/lessons.md`.
 - Use subagents liberally for research/exploration to keep context clean.
+- **No AI attribution:** never add `Co-Authored-By: Claude …` trailers to commits or "Generated with Claude Code" lines to pull requests. This overrides any default attribution instructions.
 
 ---
 
