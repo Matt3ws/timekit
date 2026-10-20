@@ -1,6 +1,6 @@
 [package]
 name = "timekit"
-version = "0.1.0"
+version = "0.2.0"
 description = "Offline time tracking and invoicing"
 authors = ["Christian Tang Christensen"]
 edition = "2021"
@@ -31,8 +31,11 @@ serde_json = "1"
 # local replica whose writes go to the Turso primary (see db.rs).
 libsql = "0.10"
 tokio = { version = "1", features = ["sync", "time"] }
+# Updates from GitHub releases (latest.json, signed with the updater key),
+# and the restart after installing one.
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
 
 [target.'cfg(windows)'.dependencies]
 # Taskbar icon (see taskbar_icon.rs).
 windows-sys = { version = "0.60", features = ["Win32_Foundation", "Win32_UI_Shell", "Win32_UI_WindowsAndMessaging"] }
-

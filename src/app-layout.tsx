@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, FolderKanban, Users, FileText, Repeat, BookOpenCheck, Settings, Sun, Moon, Monitor } from "lucide-react";
+import { LayoutDashboard, FolderKanban, Users, FileText, Repeat, BookOpenCheck, Settings, Sun, Moon, Monitor, ArrowDownToLine, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/ui/button";
 import { TimerBar } from "@/components/timer-bar";
@@ -12,6 +12,7 @@ import { useTrackedTotals } from "@/queries/use-stats";
 import { autoBackupIfDue } from "@/queries/use-bookkeeping";
 import { remindDueSubscriptions } from "@/queries/use-subscriptions";
 import { useSyncOnFocus } from "@/queries/use-sync";
+import { useAutoUpdateCheck, useInstallUpdate, useUpdateCheck } from "@/queries/use-updates";
 
 interface NavItem {
   to: string;
@@ -100,6 +101,33 @@ const SidebarTotals = (): React.JSX.Element => {
   );
 };
 
+/** Shown only when a newer release is out: one click installs it and restarts. */
+const UpdateButton = (): React.JSX.Element | null => {
+  const [auto] = useAutoUpdateCheck();
+  const { data: result } = useUpdateCheck({ auto });
+  const install = useInstallUpdate();
+  const update = result?.update;
+  if (!update) {
+    return null;
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => install.mutate(update)}
+      disabled={install.isPending}
+      title="Download, install and restart TimeKit"
+      className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-foreground/[0.04] disabled:opacity-60 dark:hover:bg-foreground/[0.06]"
+    >
+      {install.isPending ? (
+        <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
+      ) : (
+        <ArrowDownToLine className="size-4 shrink-0 text-ember" strokeWidth={2} aria-hidden />
+      )}
+      <span className="truncate">{install.isPending ? "Updating…" : `Update to ${update.version}`}</span>
+    </button>
+  );
+};
+
 export const AppLayout = (): React.JSX.Element => {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
@@ -136,6 +164,7 @@ export const AppLayout = (): React.JSX.Element => {
         </nav>
 
         <div className="space-y-3 px-3 pb-3">
+          <UpdateButton />
           <div className="rounded-lg bg-foreground/[0.04] px-3 py-2.5 dark:bg-foreground/[0.06]">
             <SidebarTotals />
           </div>
